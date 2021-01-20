@@ -1,0 +1,30 @@
+version: '3.9'
+services:
+  web_server:
+    build: ./web
+    environment: 
+      - FLASK_ENV=development
+      - FLASK_APP=app.py
+      - FLASK_RUN_HOST=0.0.0.0
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./web:/web
+    depends_on:
+      - tensorflow-serving
+    networks: 
+      - ml-networks
+        
+  tensorflow-serving:
+    build: .
+    ports: 
+      - '8500:8500'
+      - '8501:8501'
+    volumes: 
+      - './1:/models/text/1'
+    networks: 
+      - ml-networks
+
+networks:
+  ml-networks:
+    driver: bridge
