@@ -6,13 +6,17 @@ docker-compose up # run affter build
 
 # API 
 
-api : {
+```c++
+api : 
+{
     http://localhost:5000/init : return {'id':id_of_conversation}
+
     http://localhost:5000/messeger/{id_conversation} : 
 
 }
 
 {
+    
     "actionResponse": "action_build_item",
 
     "entities": "{\"hero\": [\"LeeSin\"], \"postion\": [[1, \"LeeSin\"]]}",
@@ -27,10 +31,16 @@ api : {
 
     "slots": "{\"champ\": [\"LeeSin\"], \"skill\": \"\"}"
 }
+```
 
 # DESCRIPTION
 
-1. TEXT -> MODEL : (INTENT,ENTITIES) -> COMBINE(PREVIOUS_QUESTION,(INTENT,ENTITIES)) -> NEXT_ACTION -> DATABASE -> RESPONSE_TEXT.
+1. TEXT
+2. MODEL : (INTENT,ENTITIES)
+3. COMBINE(PREVIOUS_QUESTION,(INTENT,ENTITIES))
+4. NEXT_ACTION 
+5. DATABASE 
+6. RESPONSE_TEXT
  
 # TODO
 
