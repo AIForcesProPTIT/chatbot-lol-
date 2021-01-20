@@ -1,6 +1,7 @@
 # SETUP 
 
 docker-compose up -d --build # build docker
+
 docker-compose up # run affter build
 
 # API 
