@@ -8,7 +8,7 @@ from flask_socketio import SocketIO, emit
 from web.api import apiBp
 from web.socket_test import messBp
 import requests
-
+from web import db
 app = create_app()
 
 app.register_blueprint(apiBp,url_prefix="")
@@ -21,10 +21,9 @@ from flask_socketio import SocketIO
 # from flask.ext.socketio import SocketIO, emit
 socketio = SocketIO(app)
 
+
 @socketio.on('my event')
 def test_message(message):
-    # logging.debug('here')
-    # print('here')
     text = message['data']
     req  = {'conversation_id':49,'message':text}
     # res =
@@ -36,17 +35,39 @@ def test_message(message):
 
 
 
+@socketio.on('response_from_client')
+def message_from_user(message):
+    text = message['data']
+    id_conversation = message['id_conversation']
+    req  = {'conversation_id':id_conversation,'message':text}
+    # res =
+    headers={"Content-Type":"application/json"}
+    import json
+    response = requests.post(url="http://0.0.0.0:5000/apis/conversation",data= json.dumps(req),headers=headers)
+    # print(response.status_code,response.json())
+    emit('response_from_sever', {'data': response.json()})
+
+@socketio.on('newChatID')
+def test_connect():
+    # logging.debug("here")
+    # print('here')
+    data = db.get_db()
+    id_last = data.execute(
+            'SELECT MAX(id) AS max_id FROM conservation'
+        ).fetchone()['max_id']
+        # print(id_last['max_id'])
+    
+    data.execute(
+        'INSERT INTO conservation (created) VALUES (CURRENT_TIMESTAMP);'
+    )
+    data.commit()
+    # response.update({'id':id_last+1})
+
+    emit('new_chat', {'data': 'Hi can I help you.','id_conversation':id_last})
+
 @socketio.on('connect')
 def test_connect():
-    logging.debug('here')
-    emit('my response', {'data': 'user login to chat'})
-
-x=0
-@socketio.on("my_ping")
-def test_ping():
-    global x
-    x+=1
-    emit('my response',{'data':'ping data','count':x})
+    print("connected")
 
 @socketio.on('disconnect')
 def test_disconnect():

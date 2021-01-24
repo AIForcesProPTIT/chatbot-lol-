@@ -46,3 +46,9 @@ api :
 
 1. CRAWL DATA
 2. COMPLETE CHATSOCKET
+
+
+bạn ơi giới thiệu con này cho mình với.
+Lee
+con đó lên đồ kiểu gì 
+lên tăng skill như thế nào 

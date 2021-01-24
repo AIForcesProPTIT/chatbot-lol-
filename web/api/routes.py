@@ -55,7 +55,6 @@ def init_convsersation():
         data = db.get_db()
         data.execute(
             'INSERT INTO conservation (created) VALUES (CURRENT_TIMESTAMP);'
-
         )
         data.commit()
         response.update({'id':id_last+1})

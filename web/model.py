@@ -6,6 +6,36 @@ from flask import Flask, request, jsonify
 with open("./DB/alldata.json","r") as f:
     data_all = json.load(f) 
 
+def get_champ(name):
+    for champ in data_all:
+        if champ['info_simple']['name'] == name:return champ
+
+def get_entities_champ(name, entities):
+    
+
+    champ = get_champ(name)
+
+    if champ is not None:
+        if entities == 'introduce':
+            answ= champ['how_to_play']
+            answ = answ.replace('Cách chơi','giới thiệu')
+            return answ
+        if entities == 'how_to_play':
+            return champ['how_to_play']
+        if entities == 'build_item':
+            return champ['item']
+        # if entities == 'combo':return 'data cho how_to_combo chua co'
+        if entities == 'support_socket':
+            return champ['socker']
+        
+        if entities == 'skill_up':
+            return champ['skill_up']
+        
+        return "cau tra loi cho tuong {} ve {}".format(name,entities)
+
+
+
+
 def encode(**kwargs):
     
     data = {}
@@ -21,7 +51,7 @@ def encode(**kwargs):
 def decode(**kwargs):
     data = {}
     data.update(**kwargs)
-    print(data,'\n - decode - \n')
+    # print(data,'\n - decode - \n')
     if data['slots'] == "":data['slots'] = {'champ':'','skill':''}
     else:
         data['slots'] = json.loads(data['slots'])
@@ -49,7 +79,7 @@ class Dialog(object):
 
         self.answer['actionResponse'] = 'action_counter'
 
-        self.answer['response'] = 'response'
+        self.answer['response'] = 'xin lỗi bạn BOT không nhận ra câu hỏi.\nBanj'
 
         self.find_slots()
         self.answer['slots'] = self.slots   
@@ -62,7 +92,7 @@ class Dialog(object):
         if 'skill' in self.answer['entities']:
             self.skill = self.answer['entities']['skill']
         
-        print(self.answer['ranking'])
+        # print(self.answer['ranking'])
         
 
         if self.answer['intent'] in [
@@ -71,12 +101,13 @@ class Dialog(object):
             if self.hero is None:
                 self.hero = self.slots['champ']
             if self.hero == '' or self.hero is None:
-                self.answer['response'] = 'Ban muon hoi con nao?'
+                self.answer['response'] = 'Bạn muốn hỏi về tướng nào nhỉ?'
                 self.answer['actionResponse'] = 'action_ask_hero'
                 # self.answer['slots'] = self.slots
                 return 
+
             else:
-                self.answer['response'] = 'tra loi cho entities {} voi intent la {}'.format(self.hero[0],self.answer['intent'])
+                self.answer['response'] = get_entities_champ(self.hero[0],self.answer['intent'])
                 self.answer['actionResponse'] = 'action_{}'.format(self.answer['intent'])
                 self.answer['slots'] = self.slots
                 self.answer['slots']['champ'] = self.hero
@@ -115,7 +146,7 @@ class Dialog(object):
                     self.hero = self.hero + self.slots['champs']
             if self.hero is not None and len(self.hero) == 1:
                 self.answer['slots']['main'] = self.hero[0]
-                self.answer['response'] = 'tra loi cho entities {} voi intent la {}'.format(self.hero[0],self.answer['intent'])
+                self.answer['response'] = get_entities_champ(self.hero[0],self.answer['intent']) 
                 self.answer['actionResponse'] = 'action_{}'.format(self.answer['intent'])
                 self.answer['slots'] = self.slots
                 self.answer['slots']['champ'] = self.hero[0]
@@ -138,7 +169,7 @@ class Dialog(object):
             # if self.messeger_his[-1]['intent']
             if len(self.messeger_his)==0 or self.messeger_his[-1]['response'] in ['action_no_answer','action_ask_intent']:
                 #action_ask_intent
-                self.answer['response'] = '!!!!!!!!!!!!!'
+                # self.answer['response'] = '!!!!!!!!!!!!!'
                 self.answer['actionResponse'] = 'action_ask_intent'
                 # self.answer['intent'] = self.messeger_his[-1]['intent'
                 self.answer['slots'] = self.slots
@@ -146,7 +177,7 @@ class Dialog(object):
                 if self.skill is not None and self.skill !='':self.answer['slots']['skill']  = self.skill
                 return
             if (self.hero is None or self.hero == '')and (self.skill is None or self.skill == ''):
-                self.answer['response'] = '!!!!!!!!!!!!!'
+                # self.answer['response'] = '!!!!!!!!!!!!!'
                 self.answer['actionResponse'] = 'action_no_answer'
                 self.answer['intent'] = self.messeger_his[-1]['intent']
                 self.answer['slots'] = self.messeger_his[-1]['slots']
@@ -155,7 +186,7 @@ class Dialog(object):
             if len(self.messeger_his) >= 1:
                 if self.messeger_his[-1]['intent'] not in ['fallback','counter','be_countered','how_to_use_skill']:
                     if self.hero is not None and len(self.text_cur.split()) <=  7:
-                        self.answer['response'] = 'tra loi cho entities {} voi intent la {}'.format(self.hero[0],self.messeger_his[-1]['intent'])
+                        self.answer['response'] = get_entities_champ(self.hero[0],self.messeger_his[-1]['intent']) 
                         self.answer['actionResponse'] = 'action_{}'.format(self.messeger_his[-1]['intent'])
                         self.answer['intent'] = self.messeger_his[-1]['intent']
                         self.answer['slots'] = self.messeger_his[-1]['slots']
@@ -165,7 +196,7 @@ class Dialog(object):
                         return
                 elif self.messeger_his[-1]['intent'] in ['be_countered','counter']:
                     hero  = self.hero[0]
-                    print("becounter " ,self.hero)
+                    # print("becounter " ,self.hero)
                     if 'main' in self.slots.keys():
                         self.slots['sp'] = hero
                         self.answer['response'] = 'tra loi database con {} co counter duoc con {}'.format(self.slots['main'],self.slots['sp'])
